@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary: #e11d48;
+  --background: #000000;
+  --foreground: #ffffff;
+  --surface: rgba(255, 255, 255, 0.05);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--background);
+  color: var(--foreground);
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-top: -4px;
+  transition: transform 0.2s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+
+.volume-slider::-webkit-slider-runnable-track {
+  width: 80px;
+}
+
+.youtube-container iframe {
+  pointer-events: none !important;
+}
+
+.youtube-container a,
+.youtube-container button {
+  pointer-events: none !important;
+  display: none !important;
+}
+
+iframe[src*="youtube.com"] {
+  pointer-events: none !important;
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(to right, #ec4899, #f43f5e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
