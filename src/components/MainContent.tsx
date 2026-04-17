@@ -434,6 +434,30 @@ export default function MainContent() {
             <h2 className="text-xl md:text-2xl font-bold">Search</h2>
             <p className="text-gray-400 text-sm">Search for your favorite songs, artists, or albums!</p>
           </div>
+        ) : viewMode === 'local' ? (
+          <div className="space-y-4">
+            <h2 className="text-xl md:text-2xl font-bold">Local Files</h2>
+            {state.localSongs.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-gray-400 text-sm mb-4">No local files added yet.</p>
+                <p className="text-gray-500 text-xs">Use "+ Local" button to add audio files from your device</p>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => state.localSongs.length > 0 && playSong(state.localSongs[0], state.localSongs)}
+                  className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg font-medium mb-4"
+                >
+                  Play All ({state.localSongs.length})
+                </button>
+                <div className="space-y-2">
+                  {state.localSongs.map((song) => (
+                    <SongItem key={song.id} song={song} allSongs={state.localSongs} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         ) : (
           <div className="space-y-6 md:space-y-8">
             <div className="flex gap-3 md:gap-4">

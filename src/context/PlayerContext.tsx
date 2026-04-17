@@ -5,6 +5,7 @@ import { Song, PlayMode, Theme, Playlist } from "@/lib/types";
 
 type Action =
   | { type: "SET_QUEUE"; payload: Song[] }
+  | { type: "SET_CURRENT_INDEX"; payload: number }
   | { type: "ADD_TO_QUEUE"; payload: Song }
   | { type: "PLAY_SONG"; payload: { song: Song; queue?: Song[] } }
   | { type: "NEXT_SONG" }
@@ -81,6 +82,8 @@ function reducer(state: PlayerState, action: Action): PlayerState {
   switch (action.type) {
     case "SET_QUEUE":
       return { ...state, queue: action.payload };
+    case "SET_CURRENT_INDEX":
+      return { ...state, currentIndex: action.payload };
     case "ADD_TO_QUEUE":
       return { ...state, queue: [...state.queue, action.payload] };
     case "PLAY_SONG": {
@@ -247,36 +250,51 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       const savedTheme = localStorage.getItem("desi_theme");
       const savedPlaylists = localStorage.getItem("desi_playlists");
       const savedOffscreen = localStorage.getItem("desi_offscreen");
-
-      if (savedFavorites) {
-        dispatch({ type: "TOGGLE_FAVORITE", payload: JSON.parse(savedFavorites)[0] || { id: "", title: "", artist: "", thumbnail: "", duration: 0, videoId: "" } });
-        dispatch({ type: "TOGGLE_FAVORITE", payload: { id: "", title: "", artist: "", thumbnail: "", duration: 0, videoId: "" } });
-      }
+      const savedLocalSongs = localStorage.getItem("desi_local_songs");
 
       if (savedFavorites) {
         const favs = JSON.parse(savedFavorites);
-        favs.forEach((s: Song) => {
-          dispatch({ type: "TOGGLE_FAVORITE", payload: s });
-        });
+        if (Array.isArray(favs)) {
+          favs.forEach((s: Song) => {
+            dispatch({ type: "TOGGLE_FAVORITE", payload: s });
+          });
+        }
       }
 
       if (savedHistory) {
         const history = JSON.parse(savedHistory);
-        history.forEach((s: Song) => {
-          dispatch({ type: "ADD_TO_HISTORY", payload: s });
-        });
-      }
-
-      if (savedVolume) {
-        dispatch({ type: "SET_VOLUME", payload: parseFloat(savedVolume) });
+        if (Array.isArray(history)) {
+          history.forEach((s: Song) => {
+            dispatch({ type: "ADD_TO_HISTORY", payload: s });
+          });
+        }
       }
 
       if (savedPlaylists) {
         dispatch({ type: "LOAD_SAVED_PLAYLISTS", payload: JSON.parse(savedPlaylists) });
       }
 
+      if (savedVolume) {
+        dispatch({ type: "SET_VOLUME", payload: parseFloat(savedVolume) });
+      }
+
       if (savedOffscreen !== null) {
         dispatch({ type: "SET_OFFSCREEN_PLAY", payload: savedOffscreen === "true" });
+      }
+
+      if (savedLocalSongs) {
+        const localSongs = JSON.parse(savedLocalSongs);
+        if (Array.isArray(localSongs) && localSongs.length > 0) {
+          dispatch({ type: "ADD_LOCAL_SONGS", payload: localSongs });
+        }
+      }
+
+      if (savedQueue) {
+        const queue = JSON.parse(savedQueue);
+        if (Array.isArray(queue) && queue.length > 0) {
+          dispatch({ type: "SET_QUEUE", payload: queue });
+          dispatch({ type: "SET_CURRENT_INDEX", payload: parseInt(savedCurrentIndex) || 0 });
+        }
       }
     } catch (error) {
       console.error("Error loading saved data:", error);
@@ -318,6 +336,17 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("desi_playlists", JSON.stringify(state.playlists));
     } catch (e) {}
   }, [state.playlists]);
+
+  useEffect(() => {
+    if (!initialized.current) return;
+    try {
+      const localSongsWithoutBlob = state.localSongs.map(song => ({
+        ...song,
+        videoId: song.localUrl || song.videoId
+      }));
+      localStorage.setItem("desi_local_songs", JSON.stringify(localSongsWithoutBlob));
+    } catch (e) {}
+  }, [state.localSongs]);
 
   useEffect(() => {
     if (!initialized.current) return;

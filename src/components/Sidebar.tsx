@@ -5,7 +5,7 @@ import { usePlayer } from "@/context/PlayerContext";
 import { useAppContext } from "@/context/AppContext";
 import { 
   Home, Search, Heart, Clock, ListMusic, 
-  Plus, Download, ChevronDown, Music
+  Plus, Download, ChevronDown, Music, FolderOpen
 } from "lucide-react";
 
 const GENRES = [
@@ -142,6 +142,14 @@ export default function Sidebar() {
             <ListMusic className="w-5 h-5" />
             <span className="font-medium">Playlists</span>
             <span className="ml-auto text-xs text-gray-500">{state.playlists.length}</span>
+          </button>
+          <button
+            onClick={() => handleTabClick('local')}
+            className={`w-full flex items-center gap-4 px-4 py-2 rounded-lg transition-colors ${viewMode === 'local' ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+          >
+            <FolderOpen className={`w-5 h-5 ${viewMode === 'local' ? 'text-orange-400' : ''}`} />
+            <span className="font-medium">Local Files</span>
+            <span className="ml-auto text-xs text-gray-500">{state.localSongs.length}</span>
           </button>
 
           {isExpanded && (

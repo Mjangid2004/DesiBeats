@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { usePlayer } from "@/context/PlayerContext";
 
 export default function ProgressBar() {
-  const { state, dispatch } = usePlayer();
+  const { state, dispatch, seek } = usePlayer();
   const [isDragging, setIsDragging] = useState(false);
+  const progressRef = useRef<HTMLDivElement>(null);
   
   const currentSong = state.queue[state.currentIndex];
   const progress = state.duration > 0 ? (state.currentTime / state.duration) * 100 : 0;
@@ -17,35 +18,58 @@ export default function ProgressBar() {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!state.duration) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const percent = (e.clientX - rect.left) / rect.width;
-    const newTime = percent * state.duration;
-    dispatch({ type: "SET_CURRENT_TIME", payload: newTime });
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!state.duration || !currentSong) return;
     
-    const player = (window as any).youtubePlayer;
-    if (player && player.seekTo) {
-      player.seekTo(newTime);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const newTime = percent * state.duration;
+    
+    seek(newTime);
+    
+    const youtubePlayer = (window as any).youtubePlayer;
+    if (youtubePlayer && youtubePlayer.seekTo) {
+      youtubePlayer.seekTo(newTime, true);
     }
   };
 
+  const handleDragStart = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    handleSeek(e);
+  };
+
+  const handleDragMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !state.duration) return;
+    handleSeek(e);
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
+
   return (
-    <div className="w-full px-4 space-y-2">
+    <div 
+      className="w-full px-4 space-y-2"
+      onMouseLeave={handleDragEnd}
+    >
       <div
-        onClick={handleClick}
-        className="relative h-1.5 bg-white/20 rounded-full cursor-pointer group"
+        ref={progressRef}
+        className="relative h-2 bg-white/20 rounded-full cursor-pointer group"
+        onClick={handleSeek}
+        onMouseDown={handleDragStart}
+        onMouseMove={isDragging ? handleDragMove : undefined}
+        onMouseUp={handleDragEnd}
       >
         <div
-          className="absolute h-full bg-white rounded-full transition-all"
+          className="absolute h-full bg-gradient-to-r from-pink-500 to-rose-500 rounded-full transition-all"
           style={{ width: `${progress}%` }}
         />
         <div
-          className="absolute w-3 h-3 bg-white rounded-full -top-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute w-4 h-4 bg-white rounded-full -top-1 shadow-lg opacity-0 group-hover:opacity-100 transition-all"
           style={{ left: `${progress}%`, transform: 'translateX(-50%)' }}
         />
       </div>
-      <div className="flex justify-between text-xs text-gray-400">
+      <div className="flex justify-between text-xs text-gray-400 font-medium">
         <span>{formatTime(state.currentTime)}</span>
         <span>{formatTime(state.duration)}</span>
       </div>
