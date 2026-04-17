@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { PlayerProvider } from "@/context/PlayerContext";
+import { AppProvider } from "@/context/AppContext";
 import Sidebar from "@/components/Sidebar";
 import MainContent from "@/components/MainContent";
 import NowPlaying from "@/components/NowPlaying";
@@ -47,22 +48,24 @@ function MusicPlayerApp() {
 
   return (
     <PlayerProvider>
-      <div className="h-screen flex flex-col bg-black text-white overflow-hidden">
-        <button 
-          id="install-trigger" 
-          style={{ display: 'none' }} 
-          onClick={handleInstallClick}
-        />
-        
-        <div className="flex-1 flex overflow-hidden">
-          <div className="hidden md:block w-64 lg:w-72">
-            <Sidebar />
+      <AppProvider>
+        <div className="h-screen flex flex-col bg-black text-white overflow-hidden">
+          <button 
+            id="install-trigger" 
+            style={{ display: 'none' }} 
+            onClick={handleInstallClick}
+          />
+          
+          <div className="flex-1 flex overflow-hidden">
+            <div className="hidden md:block w-64 lg:w-72">
+              <Sidebar />
+            </div>
+            <MainContent />
           </div>
-          <MainContent />
+          <BottomNav />
+          <NowPlaying />
         </div>
-        <BottomNav />
-        <NowPlaying />
-      </div>
+      </AppProvider>
     </PlayerProvider>
   );
 }
