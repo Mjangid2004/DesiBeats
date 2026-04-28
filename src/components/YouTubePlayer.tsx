@@ -146,6 +146,16 @@ export default function YouTubePlayer() {
     }
   }, [state.volume, isReady]);
 
+  useEffect(() => {
+    if (!playerRef.current || !currentSong || !isReady) return;
+    try {
+      const playerTime = playerRef.current.getCurrentTime?.() || 0;
+      if (Math.abs(state.currentTime - playerTime) > 2) {
+        playerRef.current.seekTo(state.currentTime);
+      }
+    } catch (e) {}
+  }, [state.currentTime, currentSong, isReady]);
+
   const updateProgress = useCallback(() => {
     try {
       if (playerRef.current) {

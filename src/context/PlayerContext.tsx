@@ -293,7 +293,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         const queue = JSON.parse(savedQueue);
         if (Array.isArray(queue) && queue.length > 0) {
           dispatch({ type: "SET_QUEUE", payload: queue });
-          dispatch({ type: "SET_CURRENT_INDEX", payload: parseInt(savedCurrentIndex) || 0 });
+          dispatch({ type: "SET_CURRENT_INDEX", payload: savedCurrentIndex ? parseInt(savedCurrentIndex) || 0 : 0 });
         }
       }
     } catch (error) {
