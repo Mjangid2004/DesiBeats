@@ -65,24 +65,42 @@ export default function NowPlaying() {
     <>
       {showPlayer && (
         <div className="fixed inset-0 z-50 bg-black">
-          <div className="h-full flex flex-col p-4">
-            <div className="flex items-center justify-between mb-4">
+          <div className="h-full flex flex-col p-6">
+            <div className="flex items-center justify-between mb-6">
               <button onClick={() => setShowPlayer(false)} className="p-2 hover:bg-white/10 rounded-full">
                 <X className="w-6 h-6" />
               </button>
-              <button onClick={() => setShowLyrics(true)} className="p-2 hover:bg-white/10 rounded-full">
-                <Music2 className="w-6 h-6" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => setShowPlaylistMenu(true)} className="p-2 hover:bg-white/10 rounded-full">
+                  <Plus className="w-6 h-6" />
+                </button>
+                <button onClick={() => currentSong && toggleFavorite(currentSong)} className="p-2 hover:bg-white/10 rounded-full">
+                  <Heart className={liked ? "w-6 h-6 text-red-500" : "w-6 h-6"} fill={liked ? "currentColor" : "none"} />
+                </button>
+              </div>
             </div>
-            <div className="flex-1 flex items-center justify-center">
-              {currentSong && <img src={currentSong.thumbnail} alt={currentSong.title} className="max-w-md max-h-80 rounded-xl" />}
+            
+            <div className="flex-1 flex flex-col items-center justify-center">
+              {currentSong && (
+                <img src={currentSong.thumbnail} alt={currentSong.title} className="w-72 h-72 rounded-xl object-cover shadow-2xl" />
+              )}
             </div>
-            <div className="mt-4">
-              <h2 className="text-xl font-bold">{currentSong?.title}</h2>
-              <p className="text-gray-400">{currentSong?.artist}</p>
-              <button onClick={() => currentSong && toggleFavorite(currentSong)} className="mt-2">
-                <Heart className={liked ? "w-6 h-6 text-red-500" : "w-6 h-6"} fill={liked ? "currentColor" : "none"} />
-              </button>
+            
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold text-center">{currentSong?.title}</h2>
+              <p className="text-gray-400 text-center mt-2">{currentSong?.artist}</p>
+            </div>
+            
+            <div className="mt-8">
+              <ProgressBar />
+            </div>
+            
+            <div className="flex items-center justify-center gap-8 mt-6">
+              <Controls />
+            </div>
+            
+            <div className="mt-6">
+              <VolumeControl />
             </div>
           </div>
         </div>
