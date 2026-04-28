@@ -6,12 +6,15 @@ import { usePlayer } from "@/context/PlayerContext";
 export function useMediaSession() {
   const { state, dispatch, nextSong, prevSong } = usePlayer();
 
-  console.log("[MediaSession] Initializing, isPlaying:", state.isPlaying, "hasMediaSession:", "mediaSession" in navigator);
+  if (typeof window !== 'undefined') {
+    const hasMediaSession = "mediaSession" in navigator;
+    console.log("[MediaSession] Init, playing:", state.isPlaying, "supported:", hasMediaSession);
+    if (!hasMediaSession) {
+      console.log("[MediaSession] NOT supported in this browser");
+    }
+  }
 
   const updateMediaSession = useCallback(() => {
-    if (!("mediaSession" in navigator)) {
-      console.log("[MediaSession] NOT supported in this browser");
-      return;
 
     const currentSong = state.queue[state.currentIndex];
     if (!currentSong) {
@@ -34,18 +37,31 @@ export function useMediaSession() {
   }, [state.queue, state.currentIndex]);
 
   useEffect(() => {
-    if (!("mediaSession" in navigator)) return;
+    if (!("mediaSession" in navigator)) {
+      console.log("[MediaSession] NOT supported");
+      return;
+    }
 
-    navigator.mediaSession.setActionHandler("play", () => dispatch({ type: "TOGGLE_PLAY" }));
-    navigator.mediaSession.setActionHandler("pause", () => dispatch({ type: "TOGGLE_PLAY" }));
+    navigator.mediaSession.setActionHandler("play", () => {
+      console.log("[MediaSession] Play clicked");
+      dispatch({ type: "TOGGLE_PLAY" });
+    });
+    navigator.mediaSession.setActionHandler("pause", () => {
+      console.log("[MediaSession] Pause clicked");
+      dispatch({ type: "TOGGLE_PLAY" });
+    });
     navigator.mediaSession.setActionHandler("previoustrack", () => {
+      console.log("[MediaSession] Prev clicked");
       if (state.currentTime > 3) {
         dispatch({ type: "SET_CURRENT_TIME", payload: 0 });
       } else {
         prevSong();
       }
     });
-    navigator.mediaSession.setActionHandler("nexttrack", () => nextSong());
+    navigator.mediaSession.setActionHandler("nexttrack", () => {
+      console.log("[MediaSession] Next clicked");
+      nextSong();
+    });
     navigator.mediaSession.setActionHandler("seekbackward", (details: { seekOffset?: number }) => {
       const newTime = Math.max(0, state.currentTime - (details.seekOffset || 10));
       dispatch({ type: "SET_CURRENT_TIME", payload: newTime });
