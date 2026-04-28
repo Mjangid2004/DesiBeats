@@ -27,6 +27,7 @@ export default function MainContent() {
   const [genreSongs, setGenreSongs] = useState<Song[]>([]);
   const [showAddToPlaylist, setShowAddToPlaylist] = useState(false);
   const [songToAdd, setSongToAdd] = useState<Song | null>(null);
+  const [selectedPlaylist, setSelectedPlaylist] = useState<{id: string; name: string; songs: Song[]} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -366,9 +367,7 @@ export default function MainContent() {
                     key={`playlist-${playlist.id}`} 
                     className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 rounded-lg cursor-pointer"
                     onClick={() => {
-                      if (playlist.songs.length > 0) {
-                        playSong(playlist.songs[0], playlist.songs);
-                      }
+                      setSelectedPlaylist(playlist);
                     }}
                   >
                     <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-lg flex items-center justify-center">
@@ -383,6 +382,32 @@ export default function MainContent() {
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+        ) : selectedPlaylist ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <button onClick={() => setSelectedPlaylist(null)} className="text-sm text-gray-400 hover:text-white">
+                ← Back
+              </button>
+              <h2 className="text-xl md:text-2xl font-bold">{selectedPlaylist.name}</h2>
+            </div>
+            {selectedPlaylist.songs.length === 0 ? (
+              <p className="text-gray-400 text-sm">No songs in this playlist</p>
+            ) : (
+              <>
+                <button
+                  onClick={() => playSong(selectedPlaylist.songs[0], selectedPlaylist.songs)}
+                  className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 rounded-lg font-medium"
+                >
+                  Play All ({selectedPlaylist.songs.length})
+                </button>
+                <div className="space-y-2">
+                  {selectedPlaylist.songs.map((song, index) => (
+                    <SongItem key={`pl-${song.id}-${index}`} song={song} allSongs={selectedPlaylist.songs} />
+                  ))}
+                </div>
+              </>
             )}
           </div>
         ) : selectedGenre ? (
