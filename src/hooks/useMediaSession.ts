@@ -6,8 +6,12 @@ import { usePlayer } from "@/context/PlayerContext";
 export function useMediaSession() {
   const { state, dispatch, nextSong, prevSong } = usePlayer();
 
+  console.log("[MediaSession] Initializing, isPlaying:", state.isPlaying, "hasMediaSession:", "mediaSession" in navigator);
+
   const updateMediaSession = useCallback(() => {
-    if (!("mediaSession" in navigator)) return;
+    if (!("mediaSession" in navigator)) {
+      console.log("[MediaSession] NOT supported in this browser");
+      return;
 
     const currentSong = state.queue[state.currentIndex];
     if (!currentSong) {
